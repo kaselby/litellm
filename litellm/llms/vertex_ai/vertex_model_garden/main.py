@@ -29,13 +29,11 @@ from ..vertex_llm_base import VertexBase
 def create_vertex_url(
     vertex_location: str,
     vertex_project: str,
-    stream: Optional[bool],
-    model: str,
-    api_base: Optional[str] = None,
 ) -> str:
     """Return the base url for the vertex garden models"""
     #  f"https://{self.endpoint.location}-aiplatform.googleapis.com/v1beta1/projects/{PROJECT_ID}/locations/{self.endpoint.location}"
-    return f"https://{vertex_location}-aiplatform.googleapis.com/v1beta1/projects/{vertex_project}/locations/{vertex_location}/endpoints/{model}"
+    return f"https://aiplatform.googleapis.com/v1/projects/{vertex_project}/locations/{vertex_location}/endpoints/openapi"
+
 
 
 class VertexAIModelGardenModels(VertexBase):
@@ -89,7 +87,6 @@ class VertexAIModelGardenModels(VertexBase):
                 message="""Upgrade vertex ai. Run `pip install "google-cloud-aiplatform>=1.38"`""",
             )
         try:
-            model = model.replace("openai/", "")
             vertex_httpx_logic = VertexLLM()
 
             access_token, project_id = vertex_httpx_logic._ensure_access_token(
@@ -106,8 +103,6 @@ class VertexAIModelGardenModels(VertexBase):
             default_api_base = create_vertex_url(
                 vertex_location=vertex_location or "us-central1",
                 vertex_project=vertex_project or project_id,
-                stream=stream,
-                model=model,
             )
 
             if len(default_api_base.split(":")) > 1:
@@ -124,7 +119,7 @@ class VertexAIModelGardenModels(VertexBase):
                 auth_header=None,
                 url=default_api_base,
             )
-            model = ""
+
             return openai_like_chat_completions.completion(
                 model=model,
                 messages=messages,
